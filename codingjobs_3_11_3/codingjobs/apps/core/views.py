@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
 from apps.job.models import Job
+from apps.userprofile.models import Userprofile
 
 # Create your views here.
 def frontpage(request):
@@ -16,9 +17,19 @@ def signup(request):
         
         if form.is_valid():
             user = form.save()
+            
+            account_type = request.POST.get('account_type', 'jobseeker')
+            
+            if account_type == 'employer':
+                userprofile = Userprofile.objects.create(user=user, is_employer=True)
+                userprofile.save()
+            else:
+                userprofile = Userprofile.objects.create(user=user)
+                userprofile.save()
+            
             login(request, user)
             
-            return redirect('frontpage')
+            return redirect('dashboard')
     else:
         form = UserCreationForm()
     
